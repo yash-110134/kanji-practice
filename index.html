@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kanji SRS: 650 Core</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+<title>Kanji Mastery: JLPT Style</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;300;400&family=Shippori+Mincho:wght@400;500&display=swap" rel="stylesheet">
 <style>
     :root {
         --bg-color: #0c0c0e;
@@ -14,10 +14,7 @@
         --red-accent: #e53935;
         --red-hover: #ff6161;
         --gray-border: #333;
-        --btn-again: #d32f2f;
-        --btn-hard: #f57c00;
-        --btn-good: #388e3c;
-        --btn-easy: #1976d2;
+        --correct-color: #4caf50;
     }
 
     body {
@@ -38,418 +35,422 @@
         padding: 20px;
         text-align: center;
         border-bottom: 2px solid var(--red-accent);
+        box-sizing: border-box;
     }
 
-    h1 { color: var(--text-main); margin: 0; font-weight: 600; letter-spacing: 1px;}
+    h1 { color: var(--text-main); margin: 0 0 15px 0; font-weight: 600; letter-spacing: 1px;}
     h1 span { color: var(--red-accent); }
+
+    .controls {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    select, button {
+        background-color: #222;
+        color: white;
+        border: 1px solid var(--gray-border);
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 15px;
+        cursor: pointer;
+        outline: none;
+        transition: all 0.2s;
+    }
+
+    button {
+        background-color: var(--red-accent);
+        font-weight: 600;
+        border: none;
+    }
+
+    button:hover { background-color: var(--red-hover); transform: translateY(-1px); }
+    button:disabled { background-color: #444; cursor: not-allowed; transform: none; color: #888;}
+
+    .mode-switch { margin-top: 20px; display: flex; gap: 10px; justify-content: center;}
+    .mode-btn { background-color: #2a2a30; border: 1px solid #3a3a40; color: #aaa; }
+    .mode-btn.active { background-color: var(--red-accent); color: white; border-color: var(--red-accent); }
 
     .container {
         width: 90%;
         max-width: 600px;
         background-color: var(--panel-bg);
-        margin: 30px 0;
+        margin-top: 30px;
+        margin-bottom: 50px;
         padding: 35px;
         border-radius: 12px;
         border: 1px solid #222;
         box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         display: none; 
         flex-direction: column;
+        align-items: center;
     }
 
     .container.active { display: flex; }
 
-    .dashboard-stats {
-        display: flex;
-        justify-content: space-around;
-        margin-bottom: 30px;
-        text-align: center;
-    }
-    
-    .stat-box { background: #1a1a20; padding: 20px; border-radius: 8px; border: 1px solid #2a2a30; width: 40%;}
-    .stat-num { font-size: 36px; font-weight: bold; color: var(--red-accent); }
-    .stat-label { color: var(--text-muted); font-size: 14px; text-transform: uppercase; }
-
-    button {
-        background-color: #222;
-        color: white;
-        border: 1px solid var(--gray-border);
-        padding: 15px;
-        border-radius: 8px;
-        font-size: 16px;
-        cursor: pointer;
-        outline: none;
-        transition: all 0.2s;
-        font-weight: 600;
-        width: 100%;
-        margin-bottom: 10px;
-    }
-
-    button.primary { background-color: var(--red-accent); border: none; }
-    button.primary:hover { background-color: var(--red-hover); transform: translateY(-2px); }
-    button:disabled { background-color: #333; color: #666; cursor: not-allowed; transform: none; border: none; }
-    
     .kanji-display {
         font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
         font-weight: 400;
-        font-size: 120px;
-        text-align: center;
-        margin: 20px 0;
+        font-size: 140px;
+        margin: 10px 0 30px 0;
         text-shadow: 0 0 20px rgba(255,255,255,0.05);
+        line-height: 1;
     }
-    
-    ruby { ruby-align: center; }
-    rt { font-family: 'Segoe UI', sans-serif; font-size: 24px; color: var(--text-muted); transform: translateY(-5px); }
 
-    .meanings-display {
-        color: var(--red-accent);
-        font-size: 24px;
-        font-weight: 600;
+    .progress { color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;}
+    
+    .instruction-text {
         text-align: center;
+        color: #aaa;
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    /* JLPT Style MCQ Options */
+    .mcq-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
         margin-bottom: 25px;
     }
 
-    .payload-section {
+    .mcq-option {
         background: #1a1a20;
-        border: 1px solid #2a2a30;
+        padding: 18px 20px;
         border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 15px;
-    }
-
-    .payload-title {
-        color: var(--text-muted);
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 8px;
-    }
-
-    .vocab-list { margin: 0; padding-left: 20px; }
-    .vocab-list li { margin-bottom: 5px; font-size: 16px; }
-    .vocab-reading { color: #aaa; font-size: 14px; }
-    
-    .grade-buttons {
+        cursor: pointer;
+        border: 1px solid #2a2a30;
+        transition: all 0.2s;
         display: flex;
-        gap: 10px;
-        margin-top: 20px;
+        align-items: center;
+        font-size: 17px;
     }
-    .grade-btn {
-        flex: 1;
-        padding: 15px 5px;
-        font-size: 14px;
-        border: none;
-        color: white;
+
+    .mcq-option:hover:not(.disabled) { background: #22222a; border-color: var(--red-accent); }
+    
+    .mcq-option.disabled { cursor: default; }
+    
+    .mcq-option.correct { 
+        background: rgba(76, 175, 80, 0.1); 
+        border-color: var(--correct-color);
+        color: var(--correct-color);
     }
     
-    .btn-again { background-color: var(--btn-again); }
-    .btn-hard { background-color: var(--btn-hard); }
-    .btn-good { background-color: var(--btn-good); }
-    .btn-easy { background-color: var(--btn-easy); }
+    .mcq-option.incorrect { 
+        background: rgba(229, 57, 53, 0.1); 
+        border-color: var(--red-accent);
+        color: var(--red-accent);
+    }
 
-    #review-details { display: none; }
+    .option-number {
+        font-weight: bold;
+        margin-right: 15px;
+        color: #666;
+    }
+
+    .furigana-text {
+        color: #aaa;
+        font-family: 'Meiryo', sans-serif;
+        margin-right: 15px;
+        min-width: 80px;
+    }
+
+    .meaning-text { font-weight: 600; }
+    
+    .mcq-option.correct .option-number, .mcq-option.correct .furigana-text { color: var(--correct-color); }
+    .mcq-option.incorrect .option-number, .mcq-option.incorrect .furigana-text { color: var(--red-accent); }
+
+    .feedback-area {
+        min-height: 30px;
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .next-btn {
+        width: 100%;
+        padding: 16px;
+        font-size: 18px;
+        display: none;
+    }
 </style>
 </head>
 <body>
 
 <header>
-    <h1>Kanji<span>SRS</span></h1>
+    <h1>JLPT<span>Kanji</span> Mastery</h1>
+    <div class="controls">
+        <select id="categorySelect" onchange="loadCategory(this.value)">
+            <option value="1">1. Numbers, Time & Days</option>
+            <option value="2">2. Nature, Weather & Geography</option>
+            <option value="3">3. People, Family & Body Parts</option>
+            <option value="4">4. Animals, Colors & Qualities</option>
+            <option value="5">5. Physical Actions & Movement</option>
+            <option value="6">6. Mental Actions & Transactions</option>
+            <option value="7">7. Places, Buildings, City</option>
+            <option value="8">8. Home, Daily Life & Food</option>
+            <option value="9">9. Society, Gov, Law & Work</option>
+            <option value="10">10. Abstract Concepts & Degrees</option>
+            <option value="11">11. Perception, Emotion, Status</option>
+            <option value="12">12. Measurement, Systems & Infra</option>
+            <option value="13">13. Core Terminology & Media</option>
+        </select>
+        <button onclick="startTestMode()">Start 20-Kanji Random Test</button>
+    </div>
+    <div class="mode-switch">
+        <button id="btnStudy" class="mode-btn active" onclick="loadCategory(document.getElementById('categorySelect').value)">Category Quiz</button>
+        <button id="btnTest" class="mode-btn" onclick="startTestMode()">Random Test</button>
+    </div>
 </header>
 
-<div id="dashboard" class="container active">
-    <div class="dashboard-stats">
-        <div class="stat-box">
-            <div id="due-count" class="stat-num">0</div>
-            <div class="stat-label">Reviews Due</div>
-        </div>
-        <div class="stat-box">
-            <div id="new-count" class="stat-num">0</div>
-            <div class="stat-label">New Kanji</div>
-        </div>
-    </div>
-    <button class="primary" onclick="startReview()" id="btn-review">Study Due Reviews</button>
-    <button onclick="startLearn()" id="btn-learn">Learn New Kanji</button>
-    <button onclick="resetData()" style="margin-top:20px; background: transparent; color: #555; border-color: #333;">Reset Progress</button>
+<div id="studyMode" class="container active">
+    <div id="studyProgress" class="progress">Kanji 1 / 50</div>
+    <div class="kanji-display" id="studyKanji">一</div>
+    <p class="instruction-text">Select the correct reading and meaning:</p>
+    
+    <div id="studyOptions" class="mcq-options"></div>
+    <div id="studyFeedback" class="feedback-area"></div>
+    <button id="studyNextBtn" class="next-btn" onclick="nextStudyQuestion()">Next Question ➔</button>
 </div>
 
-<div id="learn-view" class="container">
-    <div style="text-align:center; color:var(--text-muted); margin-bottom: 10px;" id="learn-progress">New Kanji</div>
-    <div class="kanji-display">
-        <ruby><span id="learn-kanji"></span><rt id="learn-furigana"></rt></ruby>
-    </div>
-    <div id="learn-meanings" class="meanings-display"></div>
+<div id="testMode" class="container">
+    <h2 style="color:var(--red-accent); margin-bottom: 10px; font-weight: 600;">20-Question JLPT Exam</h2>
+    <div id="testProgress" class="progress">Question 1 / 20</div>
+    <div class="kanji-display" id="testKanji">一</div>
+    <p class="instruction-text">Select the correct reading and meaning:</p>
     
-    <div class="payload-section">
-        <div class="payload-title">Radical Breakdown</div>
-        <div id="learn-radicals"></div>
-    </div>
-    
-    <div class="payload-section">
-        <div class="payload-title">Mnemonic Story</div>
-        <div id="learn-mnemonic"></div>
-    </div>
-    
-    <div class="payload-section">
-        <div class="payload-title">Target Vocabulary</div>
-        <ul class="vocab-list" id="learn-vocab"></ul>
-    </div>
-    
-    <button class="primary" onclick="finishLearnItem()" style="margin-top: 15px;">Got it (Add to SRS)</button>
-</div>
-
-<div id="review-view" class="container">
-    <div style="text-align:center; color:var(--text-muted); margin-bottom: 10px;" id="review-progress">Review</div>
-    <div class="kanji-display" style="margin-bottom: 40px;" id="review-kanji"></div>
-    <button id="btn-reveal" class="primary" onclick="revealAnswer()">Show Answer</button>
-
-    <div id="review-details">
-        <div class="meanings-display" id="review-meanings"></div>
-        <div style="text-align: center; color: var(--text-muted); font-size: 20px; margin-top: -20px; margin-bottom: 20px;" id="review-furigana"></div>
-        
-        <div class="payload-section">
-            <div class="payload-title">Target Vocabulary Recall</div>
-            <ul class="vocab-list" id="review-vocab"></ul>
-        </div>
-
-        <div style="text-align:center; margin-top: 25px; color:#aaa; font-size:14px;">How well did you recall the meaning and vocabulary?</div>
-        <div class="grade-buttons">
-            <button class="grade-btn btn-again" onclick="processGrade(1)">Again<br><small>(<1m)</small></button>
-            <button class="grade-btn btn-hard" onclick="processGrade(2)">Hard<br><small id="int-hard"></small></button>
-            <button class="grade-btn btn-good" onclick="processGrade(3)">Good<br><small id="int-good"></small></button>
-            <button class="grade-btn btn-easy" onclick="processGrade(4)">Easy<br><small id="int-easy"></small></button>
-        </div>
-    </div>
+    <div id="testOptions" class="mcq-options"></div>
+    <div id="testFeedback" class="feedback-area"></div>
+    <button id="testNextBtn" class="next-btn" onclick="nextTestQuestion()">Next Question ➔</button>
 </div>
 
 <script>
-const rawDataString = "一:いち:One|二:に:Two|三:さん:Three|四:よん:Four|五:ご:Five|六:ろく:Six|七:なな:Seven|八:はち:Eight|九:きゅう:Nine|十:じゅう:Ten|百:ひゃく:Hundred|千:せん:Thousand|万:まん:Ten thousand|間:あいだ:Interval,Space,Between|円:えん:Yen,Circle|倍:ばい:Double,Times,Fold|半:はん:Half|毎:まい:Every|今:いま:Now|先:さき:Before,Ahead,Future|来:らい:Come,Next|昔:むかし:Long ago,Past|次:つぎ:Next|何:なに:What|日:にち:Day,Sun|月:つき:Month,Moon|火:ひ:Fire|水:みず:Water|点:てん:Point,Dot,Score|金:きん:Gold,Money,Friday|土:つち:Earth,Soil,Saturday|年:とし:Year|週:しゅう:Week|時:じ:Time,Hour|分:ふん:Minute,Part,Understand|秒:びょう:Second (time)|曜:よう:Day of the week|朝:あさ:Morning|昼:ひる:Noon,Daytime|夜:よる:Night|晩:ばん:Evening,Night|夕:ゆう:Evening|春:はる:Spring|夏:なつ:Summer|秋:あき:Autumn,Fall|冬:ふゆ:Winter|季:き:Season|節:せつ:Season,Joint,Node|期:き:Period,Time,Term|始:はじ:Begin,Start|天:てん:Heaven,Sky|気:き:Spirit,Mind,Atmosphere,Mood|空:そら:Sky,Empty|晴:はれ:Clear weather,Sunny|曇:くもり:Cloudy weather|雨:あめ:Rain|雪:ゆき:Snow|風:かぜ:Wind|雲:くも:Cloud|雷:かみなり:Thunder,Lightning|温:あたた:Warm (things/temp)|暖:あたた:Warm (weather/climate)|涼:すず:Cool,Refreshing|寒:さむ:Cold (weather)|暑:あつ:Hot (weather)|熱:あつ:Heat,Hot (things),Fever|氷:こおり:Ice|炭:すみ:Charcoal,Coal|石:いし:Stone,Rock|光:ひかり:Light,Ray|星:ほし:Star|山:やま:Mountain|川:かわ:River|海:うみ:Sea,Ocean|島:しま:Island|湖:みずうみ:Lake|岸:きし:Shore,Bank,Coast|岩:いわ:Rock,Boulder,Crag|砂:すな:Sand|泉:いずみ:Spring,Fountain|滝:たき:Waterfall|谷:たに:Valley|原:はら:Field,Meadow,Original|鉱:こう:Mineral,Ore|鉄:てつ:Iron|油:あぶら:Oil|波:なみ:Wave|陸:りく:Land,Shore|上:うえ:Up,Above,Over|下:した:Down,Below,Under|左:ひだり:Left|右:みぎ:Right|中:なか:Middle,Inside,Center|外:そと:Outside,Outer|広:ひろ:Wide,Broad,Spacious|狭:せま:Narrow,Cramped|高:たか:High,Tall,Expensive|低:ひく:Low|深:ふか:Deep|浅:あさ:Shallow|男:おとこ:Man,Male|女:おんな:Woman,Female|子:こ:Child|父:ちち:Father|母:はは:Mother|兄:あに:Older brother|弟:おとうと:Younger brother|姉:あね:Older sister|妹:いもうと:Younger sister|親:おや:Parent,Intimacy,Relative|族:ぞく:Family,Tribe|夫:おっと:Husband|妻:つま:Wife|娘:むすめ:Daughter,Girl|祖:そ:Ancestor,Grandparent|友:とも:Friend|人:ひと:Person|私:わたし:I,Me,Private|者:もの:Person (formal)|員:いん:Member,Employee|徒:と:Follower,Pupil,Walking|客:きゃく:Guest,Customer|婦:ふ:Lady,Woman,Wife|供:とも:Companion,Offer|達:たち:Plural marker,Accomplish|君:きみ:You,Buddy,Suffix for males|力:ちから:Power,Strength,Force|名:な:Name,Reputation|目:め:Eye,Item|耳:みみ:Ear|口:くち:Mouth|手:て:Hand|足:あし:Foot,Leg,Sufficient|頭:あたま:Head|顔:かお:Face|首:くび:Neck|肩:かた:Shoulder|鼻:はな:Nose|歯:は:Tooth|指:ゆび:Finger,Point|髪:かみ:Hair|胸:むね:Chest,Breast|腹:はら:Abdomen,Belly|背:せ:Back,Stature|骨:ほね:Bone|血:ち:Blood|心:こころ:Heart,Mind,Spirit|命:いのち:Life,Fate,Destiny|身:み:Body,Oneself,Social position|体:からだ:Body,Form|鳥:とり:Bird|魚:さかな:Fish|犬:いぬ:Dog|猫:ねこ:Cat|牛:うし:Cow,Cattle|馬:うま:Horse|虫:むし:Insect,Bug|羊:ひつじ:Sheep|豚:ぶた:Pig,Pork|鶏:にわとり:Chicken|獣:けもの:Beast,Animal|毛:け:Hair,Fur,Wool|白:しろ:White|赤:あか:Red|青:あお:Blue,Green|黒:くろ:Black|黄:き:Yellow|色:いろ:Color|暗:くら:Dark|明:あか:Bright,Clear|新:あたら:New|古:ふる:Old (things)|多:おお:Many,Much|少:すく:Few,Little|安:やす:Cheap,Safe,Peaceful|重:おも:Heavy,Important|軽:かる:Light (weight)|痛:いた:Pain,Hurt|苦:くる:Bitter,Suffering,Hardship|悲:かな:Sad|喜:よろこ:Rejoice,Glad|怒:おこ:Angry|恥:はじ:Shame,Embarrassment|弱:よわ:Weak|強:つよ:Strong|忙:いそが:Busy|暇:ひま:Free time,Leisure|早:はや:Early,Fast|遅:おそ:Late,Slow|遠:とお:Far,Distant|近:ちか:Near,Close|良:よ:Good|悪:わる:Bad,Evil|若:わか:Young|老:お:Old (people),Age|美:うつく:Beautiful|偉:えら:Great,Admirable|派:は:Faction,Group,Sect|柔:やわ:Soft,Flexible|軟:やわ:Soft (touch)|行:い:Go,Act|帰:かえ:Return,Go home|歩:ある:Walk|走:はし:Run|止:と:Stop|飛:と:Fly|泳:およ:Swim|動:うご:Move|働:はたら:Work|休:やす:Rest,Take a break|起:お:Wake up,Rise|寝:ね:Sleep,Lie down|座:すわ:Sit|立:た:Stand|乗:の:Ride,Get on|降:お:Descend,Get off,Fall|転:ころ:Roll,Turn over|洗:あら:Wash|泣:な:Cry|笑:わら:Laugh,Smile|押:お:Push|引:ひ:Pull|拾:ひろ:Pick up|捨:す:Throw away,Discard|触:さわ:Touch,Feel|抜:ぬ:Pull out,Extract|抱:だ:Embrace,Hold|浮:う:Float|沈:しず:Sink|渡:わた:Cross,Hand over|逃:に:Escape,Run away|追:お:Chase,Follow|越:こ:Cross over,Exceed|落:お:Fall,Drop|登:のぼ:Climb|踏:ふ:Step on,Tread|散:ち:Scatter,Disperse|集:あつ:Gather,Collect|並:なら:Line up,Average|列:れつ:Row,Line,Queue|移:うつ:Move,Shift,Transfer|向:む:Face,Toward,Direction|折:お:Fold,Break,Bend|刻:きざ:Engrave,Carve,Time|切:き:Cut|貼:は:Paste,Stick,Apply|入:はい:Enter,Insert|出:で:Exit,Put out,Leave|打:う:Hit,Strike|撃:う:Attack,Defeat|見:み:See,Look|聞:き:Hear,Listen,Ask|読:よ:Read|書:か:Write|話:はな:Speak,Talk|語:かた:Language,Word,Narrate|言:い:Say,Word|思:おも:Think,Feel|考:かんが:Consider,Think|知:し:Know|覚:おぼ:Remember,Awake,Memorize|忘:わす:Forget|決:き:Decide|信:しん:Believe,Trust,Message|疑:うたが:Doubt,Suspect|願:ねが:Wish,Request|頼:たの:Request,Rely on|呼:よ:Call|答:こた:Answer|説:せつ:Explain,Theory|記:き:Record,Write down|訳:わけ:Translate,Reason|伝:つた:Transmit,Convey|認:みと:Recognize,Acknowledge|識:しき:Consciousness,Knowledge|買:か:Buy|売:う:Sell|飲:の:Drink|食:た:Eat,Food|払:はら:Pay,Sweep away|貸:か:Lend|借:か:Borrow|返:かえ:Return|使:つか:Use|持:も:Hold,Have|取:と:Take|受:う:Receive,Undergo|給:きゅう:Provide,Wage,Salary|届:とど:Deliver,Reach|贈:おく:Gift,Present|迎:むか:Welcome,Meet,Greet|探:さが:Search,Look for|索:さく:Search,Cord|換:か:Exchange|構:かま:Construct,Mind|申:もう:Say (humble)|習:なら:Learn|科:か:Course,Subject,Department|算:さん:Calculate,Compute|告:つ:Announce,Tell|国:くに:Country,Nation|都:と:Metropolis,Capital|道:みち:Road,Path,Street|府:ふ:Prefecture,Agency|県:けん:Prefecture|市:し:City,Market|区:く:Ward,District|町:まち:Town|村:むら:Village|街:まち:Street,City quarter|駅:えき:Station|港:みなと:Port,Harbor|寺:てら:Temple (Buddhist)|社:しゃ:Company,Shrine (Shinto)|院:いん:Institution,Temple|堂:どう:Hall,Public building|店:みせ:Shop,Store|屋:や:Roof,House,Shop|室:しつ:Room|窓:まど:Window|階:かい:Floor,Story,Stair|戸:と:Door|門:もん:Gate|壁:かべ:Wall|庭:にわ:Garden,Yard|柱:はしら:Pillar,Post|宿:やど:Inn,Lodge,Lodging|宅:たく:House,Home,Residence|園:その:Park,Garden|場:ば:Place,Location|所:ところ:Place|館:かん:Building,Hall|建:たて:Build,Construct|築:きず:Fabricate,Build,Construct|宮:みや:Palace,Shinto shrine|邸:てい:Mansion,Residence|城:しろ:Castle|塔:とう:Tower,Pagoda|段:だん:Step,Grade,Rank|隅:すみ:Corner,Nook|側:がわ:Side|端:はし:Edge,End,Tip|底:そこ:Bottom|頂:いただき:Top,Summit|境:さかい:Boundary,Border,Situation|囲:かこ:Surround,Enclose|横:よこ:Side,Horizontal|逆:ぎゃく:Reverse,Opposite|辺:へん:Area,Vicinity,Border|地:ち:Ground,Earth,Land|家:いえ:House,Home,Family|具:ぐ:Tool,Utensil,Ingredient|箱:はこ:Box|袋:ふくろ:Bag,Sack|皿:さら:Plate,Dish|飯:めし:Meal,Cooked rice|菜:な:Vegetable,Side dish|席:せき:Seat|靴:くつ:Shoes|荷:に:Luggage,Baggage,Load|札:ふだ:Tag,Bill,Paper money|券:けん:Ticket|機:き:Machine,Opportunity|械:かい:Machine,Apparatus|器:うつわ:Vessel,Instrument,Container|紙:かみ:Paper|線:せん:Line|糸:いと:Thread|服:ふく:Clothes|着:き:Wear,Arrive|布:ぬの:Cloth|鏡:かがみ:Mirror|傘:かさ:Umbrella|本:ほん:Book,Origin,Main|棚:たな:Shelf|机:つくえ:Desk|湯:ゆ:Hot water|濯:たく:Wash,Laundry|沸:わ:Boil,Seethe|乾:かわ:Dry|掃:は:Sweep|肉:にく:Meat|茶:ちゃ:Tea|薬:くすり:Medicine|医:い:Medicine,Doctor|煙:けむり:Smoke|根:ね:Root|種:たね:Seed,Kind,Species|枝:えだ:Branch|桜:さくら:Cherry blossom|梅:うめ:Plum|森:もり:Forest|林:はやし:Woods,Grove|木:き:Tree,Wood|花:はな:Flower|草:くさ:Grass,Weed|葉:は:Leaf|生:なま:Life,Raw,Birth|咲:さ:Bloom|枯:か:Wither,Dry up|学:まな:Study,Learning|校:こう:School|教:おし:Teach,Religion|研:けん:Polish,Study|究:きゅう:Research,Investigate|試:ため:Test,Try|験:けん:Test,Examine|業:ぎょう:Business,Vocation,Industry|職:しょく:Employment,Job|務:つと:Task,Duties|経:へ:Manage,Pass through,Sutra|済:す:Finish,Settle,Economy|政:まつりごと:Politics,Government|治:なお:Govern,Cure|法:ほう:Law,Method|律:りつ:Law,Rhythm|際:さい:Occasion,International|係:かかり:Connection,Person in charge|団:だん:Group,Association|課:か:Section,Chapter,Lesson|役:やく:Duty,Role,Service|官:かん:Official,Government|警:けい:Guard,Warn,Police|署:しょ:Government office,Station|議:ぎ:Debate,Parliament|民:たみ:People,Nation|犯:おか:Crime,Commit|罪:つみ:Guilt,Sin,Crime|留:とど:Detain,Fasten,Halt|訪:おとず:Visit,Call on|招:まね:Invite|練:れん:Practice,Knead|慣:な:Accustomed,Habit|式:しき:Style,Ceremony,Formula|祭:まつり:Festival|祝:いわ:Celebrate,Congratulate|企:くわだ:Plan,Scheme,Enterprise|労:ろう:Labor,Toil|雇:やと:Employ,Hire|商:あきな:Commerce,Trade|貿:ぼう:Trade,Exchange|営:いとな:Manage,Conduct business|史:し:History|績:せき:Exploits,Achievements|価:あたい:Value,Price|争:あらそ:Contend,Dispute,Argue|戦:たたか:War,Battle|平:たいら:Flat,Peace|和:わ:Harmony,Peace|部:ぶ:Part,Section,Club,Department|理:り:Reason,Logic|意:い:Idea,Mind,Meaning|題:だい:Topic,Problem,Subject|味:あじ:Flavor,Taste,Meaning|用:よう:Use,Business,Errand|事:こと:Matter,Thing,Fact|物:もの:Thing,Object|品:しな:Goods,Article,Dignity|質:しつ:Quality,Matter|性:せい:Nature,Gender|的:てき:Target,ic|形:かたち:Shape,Form|状:じょう:Condition,Form,Letter|態:たい:Condition,State,Appearance|度:ど:Degree,Time,Occurrence|量:りょう:Quantity,Amount|測:はか:Measure,Fathom|規:き:Standard,Measure|則:そく:Rule,Law|差:さ:Difference,Margin|残:のこ:Remain,Leftover|額:ひたい:Amount,Forehead,Frame|税:ぜい:Tax|費:ひ:Expense,Cost|割:わり:Proportion,Divide,Cut|益:えき:Benefit,Profit|財:ざい:Property,Wealth,Finance|貧:まず:Poor,Poverty|富:とみ:Rich,Wealth|技:わざ:Skill,Art,Craft|能:のう:Ability,Talent,Skill|術:じゅつ:Art,Technique,Method|造:つく:Create,Make,Structure|設:もう:Establish,Setup|備:そな:Equip,Provision,Preparation|容:よう:Contain,Form,Looks|難:むずか:Difficult,Trouble,Hardship|普:ふ:Universal,General,Normal|雑:ざつ:Miscellaneous,Mixed,Rough|単:たん:Simple,Single|複:ふく:Duplicate,Multiple,Compound|全:まった:Whole,Entire,All|満:み:Full,Satisfy|欠:か:Lack,Gap,Defect|突:つ:Stab,Protruding,Thrust|偶:ぐう:Accidental,Even number|既:すで:Already,Previously|未:み:Not yet,Un|完:かん:Perfect,Completion,End|類:るい:Sort,Kind,Class|察:さつ:Guess,Presume,Judge|念:ねん:Thought,Idea,Desire|存:そん:Exist,Suppose,Be aware of|希:き:Hope,Beg,Rare|愛:あい:Love,Affection|憎:にく:Hate,Detest|恨:うら:Grudge,Resentment|録:ろく:Record,Transcript|述:の:State,Mention,Express|論:ろん:Theory,Argument,Discuss|評:ひょう:Evaluate,Criticism|判:はん:Judge,Decide,Stamp|導:みちび:Guide,Lead|示:しめ:Show,Indicate|表:おもて:Surface,Table,Express|現:あらわ:Present,Existing,Appear|象:ぞう:Elephant,Phenomenon,Image|敬:うやま:Respect,Honor|尊:とうと:Revere,Valuable,Noble|礼:れい:Manners,Bow,Gratitude|拝:おが:Worship,Adore,Pray|儀:ぎ:Ceremony,Rule,Affair|産:う:Produce,Give birth,Native|注:そそ:Pour,Note,Focus|特:とく:Special|台:だい:Stand,Pedestal,Machine counter|康:こう:Ease,Peace,Health|介:かい:Mediate,Help,Care|去:さ:Leave,Past,Quit|映:うつ:Reflect,Project|声:こえ:Voice|弓:ゆみ:Bow (archery)|婚:こん:Marriage|姓:せい:Surname|齢:れい:Age|殿:との:Hall,Mansion,Lord|紹:しょう:Introduce|暮:く:Livelihood,Evening|努:つと:Toil,Diligent,Effort|豊:ゆた:Bountiful,Plentiful,Rich|陽:よう:Sunshine,Yang,Positive|球:たま:Sphere,Ball|燃:も:Burn,Blaze|農:のう:Farming,Agriculture|震:ふる:Quake,Shake|災:わざわ:Disaster,Calamity|害:がい:Harm,Injury|燥:そう:Parched,Dry|吹:ふ:Blow,Breathe|液:えき:Fluid,Liquid|交:まじ:Mix,Intersect,Exchange|資:し:Assets,Resources,Capital|運:はこ:Carry,Transport,Luck|楽:たの:Music,Comfort,Fun|組:くみ:Assemble,Put together,Group|車:くるま:Car,Vehicle,Wheel|字:じ:Character,Letter,Word|病:やまい:Illness,Sickness|歌:うた:Song,Sing|局:きょく:Bureau,Office,Board|健:すこ:Healthy,Health|音:おと:Sound,Noise|旅:たび:Travel,Trip|勉:べん:Endeavor,Effort|善:よ:Good,Virtuous|療:りょう:Heal,Cure,Medical treatment|防:ふせ:Defend,Protect,Prevent|救:すく:Save,Rescue|護:ご:Safeguard,Protect|衛:えい:Defense,Protection|視:し:See,Look at,Vision|査:さ:Investigate,Inspect|検:けん:Examine,Inspect|証:しょう:Evidence,Proof,Certificate|可:か:Possible,Acceptable,Can|否:いな:No,Negate,Decline|定:さだ:Determine,Fix,Decide|断:ことわ:Cut off,Decide,Refuse|案:あん:Plan,Idea,Draft|件:けん:Matter,Case,Affair|条:じょう:Clause,Article|許:ゆる:Permit,Allow|置:お:Put,Place|標:ひょう:Mark,Sign,Target|志:こころざし:Intention,Will,Motive|参:まい:Participate,Visit|共:とも:Together,Both|協:きょう:Cooperation,Co|効:き:Effect,Efficacy,Merit|結:むす:Tie,Bind,Conclude|因:よ:Cause,Factor|由:よし:Reason,Origin|河:かわ:River|流:なが:Flow,Current|浴:あ:Bathe,Bask in|正:ただ:Correct,Right,Just|角:かど:Corner,Angle,Horn|丸:まる:Round,Circle,Whole|絵:え:Picture,Painting,Drawing|図:ず:Map,Diagram,Plan|各:おのおの:Each,Every|互:たが:Mutual,Reciprocal|絡:から:Entwine,Contact|似:に:Resemble,Similar|鳴:な:Chirp,Ring,Sound|飾:かざ:Decorate,Ornament|帯:おび:Belt,Sash,Zone|輪:わ:Ring,Wheel,Circle|湾:わん:Bay,Gulf|丘:おか:Hill|坂:さか:Slope,Hill|沼:ぬま:Swamp,Bog|池:いけ:Pond|田:た:Rice field|芝:しば:Lawn,Grass|句:く:Phrase,Haiku|詞:し:Word,Poetry|詩:し:Poem,Poetry|誌:し:Magazine,Document|筆:ふで:Brush,Writing|筒:つつ:Cylinder,Tube,Pipe|封:ふう:Seal,Enclose|籍:せき:Register,Enrollment|辞:や:Resign,Word,Dictionary|典:てん:Code,Ceremony,Reference|型:かた:Model,Type,Mold|版:はん:Edition,Printing block|刷:す:Print|刊:かん:Publish,Edition|創:つく:Create,Originate|製:せい:Manufacture,Make|写:うつ:Copy,Photograph|真:ま:True,Real|像:ぞう:Image,Statue,Figure|展:てん:Unfold,Exhibit,Expand|影:かげ:Shadow,Silhouette|響:ひび:Echo,Resound,Influence|劇:げき:Drama,Play|舞:まい:Dance|姿:すがた:Figure,Form,Appearance|勢:いきお:Force,Vigor,Energy|担:にな:Shoulder,Bear|任:まか:Responsibility,Entrust|退:しりぞ:Retire,Retreat,Withdraw|昇:のぼ:Rise,Ascend|就:つ:Settle in,Take position|販:はん:Sell,Marketing|購:こう:Purchase,Buy|値:ね:Price,Value|文:ぶん:Sentence,Text,Literature"; 
-
-const richDictionary = {
-    "一": { radicals: "一 (One)", mnemonic: "A single horizontal line representing the number one.", vocab: [{word: "一つ", reading: "ひとつ", meaning: "One thing"}, {word: "一日", reading: "いちにち", meaning: "One day"}] },
-    "二": { radicals: "二 (Two)", mnemonic: "Two horizontal lines.", vocab: [{word: "二つ", reading: "ふたつ", meaning: "Two things"}, {word: "二月", reading: "にがつ", meaning: "February"}] },
-    "三": { radicals: "一 (One)", mnemonic: "Three horizontal lines.", vocab: [{word: "三日", reading: "みっか", meaning: "3rd day of the month"}, {word: "三人", reading: "さんにん", meaning: "Three people"}] },
-    "四": { radicals: "囗 (Enclosure), 八 (Eight/Divide)", mnemonic: "An enclosure divided into four parts.", vocab: [{word: "四つ", reading: "よっつ", meaning: "Four things"}, {word: "四月", reading: "しがつ", meaning: "April"}] },
-    "五": { radicals: "二 (Two), ｜ (Line), ⼌ (Box)", mnemonic: "Five horizontal and vertical strokes crossing.", vocab: [{word: "五つ", reading: "いつつ", meaning: "Five things"}, {word: "五月", reading: "ごがつ", meaning: "May"}] },
-    "六": { radicals: "八 (Eight/Divide), 亠 (Lid)", mnemonic: "Looks like a little house with a lid and two legs.", vocab: [{word: "六つ", reading: "むっつ", meaning: "Six things"}, {word: "六日", reading: "むいか", meaning: "6th day of the month"}] },
-    "七": { radicals: "一 (One), 乚 (Hook)", mnemonic: "A cut line looking like an upside-down L or 7.", vocab: [{word: "七つ", reading: "ななつ", meaning: "Seven things"}, {word: "七月", reading: "しちがつ", meaning: "July"}] },
-    "八": { radicals: "八 (Eight/Divide)", mnemonic: "Two lines splitting apart.", vocab: [{word: "八つ", reading: "やっつ", meaning: "Eight things"}, {word: "八日", reading: "ようか", meaning: "8th day of the month"}] },
-    "九": { radicals: "乙 (Second), 丿 (Slash)", mnemonic: "A person doing a push-up with their arm bent.", vocab: [{word: "九つ", reading: "ここのつ", meaning: "Nine things"}, {word: "九州", reading: "きゅうしゅう", meaning: "Kyushu (island)"}] },
-    "十": { radicals: "十 (Ten/Cross)", mnemonic: "A simple cross.", vocab: [{word: "十", reading: "とお", meaning: "Ten"}, {word: "十分", reading: "じゅっぷん", meaning: "10 minutes"}] },
-    "百": { radicals: "一 (One), 白 (White)", mnemonic: "A single line over a white box.", vocab: [{word: "百", reading: "ひゃく", meaning: "Hundred"}, {word: "三百", reading: "さんびゃく", meaning: "Three hundred"}] },
-    "千": { radicals: "十 (Ten), 丿 (Slash)", mnemonic: "A ten with a slash on top.", vocab: [{word: "千", reading: "せん", meaning: "Thousand"}, {word: "三千", reading: "さんぜん", meaning: "Three thousand"}] },
-    "万": { radicals: "一 (One), 冂 (Box), 丿 (Slash)", mnemonic: "A simplified swastika shape representing infinity or ten thousand.", vocab: [{word: "一万", reading: "いちまん", meaning: "Ten thousand"}, {word: "万年筆", reading: "まんねんひつ", meaning: "Fountain pen"}] },
-    "間": { radicals: "門 (Gate), 日 (Sun)", mnemonic: "The sun shining through the space between a gate.", vocab: [{word: "時間", reading: "じかん", meaning: "Time"}, {word: "間違い", reading: "まちがい", meaning: "Mistake"}] },
-    "円": { radicals: "冂 (Enclosure), ｜ (Line)", mnemonic: "A circle or coin trapped inside a square.", vocab: [{word: "円", reading: "えん", meaning: "Yen / Circle"}, {word: "百円", reading: "ひゃくえん", meaning: "100 Yen"}] },
-    "倍": { radicals: "亻 (Person), 立 (Stand), 口 (Mouth)", mnemonic: "A person standing by their mouth speaking double.", vocab: [{word: "二倍", reading: "にばい", meaning: "Double / Twice"}, {word: "倍数", reading: "ばいすう", meaning: "Multiple"}] },
-    "半": { radicals: "十 (Ten), 八 (Divide), 一 (One)", mnemonic: "Dividing a cross in half.", vocab: [{word: "半分", reading: "はんぶん", meaning: "Half"}, {word: "半年", reading: "はんとし", meaning: "Half a year"}] },
-    "毎": { radicals: "毋 (Mother), 人 (Person)", mnemonic: "A person visiting their mother EVERY day.", vocab: [{word: "毎日", reading: "まいにち", meaning: "Every day"}, {word: "毎週", reading: "まいしゅう", meaning: "Every week"}] },
-    "今": { radicals: "人 (Person), 一 (One), 𠃌 (Hook)", mnemonic: "A person standing right here, right NOW.", vocab: [{word: "今日", reading: "きょう", meaning: "Today"}, {word: "今月", reading: "こんげつ", meaning: "This month"}] },
-    "先": { radicals: "儿 (Legs), 土 (Earth)", mnemonic: "Legs walking ahead on the earth.", vocab: [{word: "先生", reading: "せんせい", meaning: "Teacher"}, {word: "先週", reading: "せんしゅう", meaning: "Last week"}] },
-    "来": { radicals: "木 (Tree), 一 (One), 八 (Divide)", mnemonic: "Waiting by a tree for someone to COME.", vocab: [{word: "来年", reading: "らいねん", meaning: "Next year"}, {word: "来る", reading: "くる", meaning: "To come"}] },
-    "昔": { radicals: "日 (Sun), 廿 (Twenty)", mnemonic: "Twenty suns passing by means a LONG AGO time.", vocab: [{word: "昔", reading: "むかし", meaning: "Long ago"}, {word: "昔話", reading: "むかしばなし", meaning: "Old tale"}] },
-    "次": { radicals: "冫 (Ice), 欠 (Lack)", mnemonic: "Lacking ice, we must wait for the NEXT winter.", vocab: [{word: "次", reading: "つぎ", meaning: "Next"}, {word: "次回", reading: "じかい", meaning: "Next time"}] },
-    "何": { radicals: "亻 (Person), 可 (Possible)", mnemonic: "A person asking WHAT is possible.", vocab: [{word: "何", reading: "なに", meaning: "What"}, {word: "何人", reading: "なんにん", meaning: "How many people"}] },
-    "日": { radicals: "日 (Sun)", mnemonic: "A window looking out at the sun.", vocab: [{word: "日本", reading: "にほん", meaning: "Japan"}, {word: "日曜日", reading: "にちようび", meaning: "Sunday"}] },
-    "月": { radicals: "月 (Moon)", mnemonic: "A crescent moon shining in the night.", vocab: [{word: "月曜日", reading: "げつようび", meaning: "Monday"}, {word: "今月", reading: "こんげつ", meaning: "This month"}] },
-    "火": { radicals: "火 (Fire)", mnemonic: "Flames flickering upwards.", vocab: [{word: "火曜日", reading: "かようび", meaning: "Tuesday"}, {word: "花火", reading: "はなび", meaning: "Fireworks"}] },
-    "水": { radicals: "水 (Water)", mnemonic: "A splashing drop of water.", vocab: [{word: "水", reading: "みず", meaning: "Water"}, {word: "水曜日", reading: "すいようび", meaning: "Wednesday"}] },
-    "点": { radicals: "灬 (Fire/Boil), 占 (Fortune)", mnemonic: "Reading your fortune points over a fire.", vocab: [{word: "点", reading: "てん", meaning: "Point / Score"}, {word: "満点", reading: "まんてん", meaning: "Perfect score"}] },
-    "金": { radicals: "金 (Gold)", mnemonic: "Gold nuggets hidden under an umbrella cover.", vocab: [{word: "お金", reading: "おかね", meaning: "Money"}, {word: "金曜日", reading: "きんようび", meaning: "Friday"}] },
-    "土": { radicals: "土 (Earth)", mnemonic: "A plant sprouting from the soil.", vocab: [{word: "土", reading: "つち", meaning: "Earth / Soil"}, {word: "土曜日", reading: "どようび", meaning: "Saturday"}] },
-    "年": { radicals: "干 (Dry), 丿 (Slash), 一 (One)", mnemonic: "A person carrying a dried harvest signaling a new YEAR.", vocab: [{word: "今年", reading: "ことし", meaning: "This year"}, {word: "毎年", reading: "まいとし", meaning: "Every year"}] },
-    "週": { radicals: "辶 (Road), 吉 (Good luck), 口 (Mouth)", mnemonic: "Walking a road for a WEEK brings good luck.", vocab: [{word: "週末", reading: "しゅうまつ", meaning: "Weekend"}, {word: "今週", reading: "こんしゅう", meaning: "This week"}] },
-    "時": { radicals: "日 (Sun), 寺 (Temple)", mnemonic: "The temple bell rings according to the sun to tell TIME.", vocab: [{word: "時間", reading: "じかん", meaning: "Time"}, {word: "時計", reading: "とけい", meaning: "Clock"}] },
-    "分": { radicals: "八 (Divide), 刀 (Sword)", mnemonic: "A sword dividing something into PARTS or MINUTE pieces.", vocab: [{word: "分かる", reading: "わかる", meaning: "To understand"}, {word: "五分", reading: "ごふん", meaning: "5 minutes"}] },
-    "秒": { radicals: "禾 (Grain), 少 (Few/Little)", mnemonic: "A little grain of time is a SECOND.", vocab: [{word: "秒", reading: "びょう", meaning: "Second (time)"}, {word: "数秒", reading: "すうびょう", meaning: "A few seconds"}] },
-    "曜": { radicals: "日 (Sun), 羽 (Feathers), 隹 (Bird)", mnemonic: "The SUN shines on the BIRD's FEATHERS every DAY OF THE WEEK.", vocab: [{word: "曜日", reading: "ようび", meaning: "Day of the week"}, {word: "日曜日", reading: "にちようび", meaning: "Sunday"}] },
-    "朝": { radicals: "月 (Moon), 十 (Ten), 日 (Sun)", mnemonic: "The sun rising while the moon is still faintly visible in the MORNING.", vocab: [{word: "朝", reading: "あさ", meaning: "Morning"}, {word: "毎朝", reading: "まいあさ", meaning: "Every morning"}] },
-    "昼": { radicals: "日 (Sun), 尺 (Measure)", mnemonic: "Measuring the height of the sun at NOON.", vocab: [{word: "昼", reading: "ひる", meaning: "Noon / Daytime"}, {word: "昼休み", reading: "ひるやすみ", meaning: "Lunch break"}] },
-    "夜": { radicals: "夕 (Evening), 亻 (Person), 亠 (Lid)", mnemonic: "A person under a roof in the evening means it is NIGHT.", vocab: [{word: "夜", reading: "よる", meaning: "Night"}, {word: "今夜", reading: "こんや", meaning: "Tonight"}] },
-    "晩": { radicals: "日 (Sun), 免 (Excuse/Escape)", mnemonic: "The sun escaping the sky in the EVENING.", vocab: [{word: "今晩", reading: "こんばん", meaning: "This evening"}, {word: "晩ご飯", reading: "ばんごはん", meaning: "Dinner"}] },
-    "夕": { radicals: "夕 (Evening)", mnemonic: "A crescent moon appearing early in the EVENING.", vocab: [{word: "夕方", reading: "ゆうがた", meaning: "Evening"}, {word: "七夕", reading: "たなばた", meaning: "Star Festival"}] },
-    "春": { radicals: "日 (Sun), 三 (Three), 人 (Person)", mnemonic: "Three people bathing in the warm sun of SPRING.", vocab: [{word: "春", reading: "はる", meaning: "Spring"}, {word: "青春", reading: "せいしゅん", meaning: "Youth"}] },
-    "夏": { radicals: "夂 (Winter/Walk), 目 (Eye)", mnemonic: "Walking with eyes squinting from the bright SUMMER sun.", vocab: [{word: "夏", reading: "なつ", meaning: "Summer"}, {word: "夏休み", reading: "なつやすみ", meaning: "Summer vacation"}] },
-    "秋": { radicals: "禾 (Grain), 火 (Fire)", mnemonic: "Burning the harvested grain fields in AUTUMN.", vocab: [{word: "秋", reading: "あき", meaning: "Autumn"}, {word: "秋分", reading: "しゅうぶん", meaning: "Autumnal equinox"}] },
-    "冬": { radicals: "夂 (Winter/Walk), 冫 (Ice)", mnemonic: "Walking on ice in the cold WINTER.", vocab: [{word: "冬", reading: "ふゆ", meaning: "Winter"}, {word: "春夏秋冬", reading: "しゅんかしゅうとう", meaning: "Four seasons"}] },
-    "季": { radicals: "禾 (Grain), 子 (Child)", mnemonic: "A child holding grain represents the harvest SEASON.", vocab: [{word: "季節", reading: "きせつ", meaning: "Season"}, {word: "四季", reading: "しき", meaning: "Four seasons"}] },
-    "節": { radicals: "竹 (Bamboo), 即 (Immediate)", mnemonic: "Bamboo joints represent SEASONS or NODES of time.", vocab: [{word: "季節", reading: "きせつ", meaning: "Season"}, {word: "節約", reading: "せつやく", meaning: "Saving / Economy"}] },
-    "期": { radicals: "月 (Moon), 其 (That/Base)", mnemonic: "Using the moon to track a PERIOD of time.", vocab: [{word: "期間", reading: "きかん", meaning: "Period / Term"}, {word: "期待", reading: "きたい", meaning: "Expectation"}] },
-    "始": { radicals: "女 (Woman), 台 (Stand)", mnemonic: "A woman standing at the starting line to BEGIN.", vocab: [{word: "始める", reading: "はじめる", meaning: "To begin (transitive)"}, {word: "開始", reading: "かいし", meaning: "Start / Commencement"}] }
+// Verified 650 Kanji Database with Furigana & Meanings
+const rawData = {
+    1: "一:いち:One|二:に:Two|三:さん:Three|四:よん:Four|五:ご:Five|六:ろく:Six|七:なな:Seven|八:はち:Eight|九:きゅう:Nine|十:じゅう:Ten|百:ひゃく:Hundred|千:せん:Thousand|万:まん:Ten thousand|間:あいだ:Interval,Space,Between|円:えん:Yen,Circle|倍:ばい:Double,Times,Fold|半:はん:Half|毎:まい:Every|今:いま:Now|先:さき:Before,Ahead,Future|来:らい:Come,Next|昔:むかし:Long ago,Past|次:つぎ:Next|何:なに:What|日:にち:Day,Sun|月:つき:Month,Moon|火:ひ:Fire|水:みず:Water|点:てん:Point,Dot,Score|金:きん:Gold,Money,Friday|土:つち:Earth,Soil,Saturday|年:とし:Year|週:しゅう:Week|時:じ:Time,Hour|分:ふん:Minute,Part,Understand|秒:びょう:Second (time)|曜:よう:Day of the week|朝:あさ:Morning|昼:ひる:Noon,Daytime|夜:よる:Night|晩:ばん:Evening,Night|夕:ゆう:Evening|春:はる:Spring|夏:なつ:Summer|秋:あき:Autumn,Fall|冬:ふゆ:Winter|季:き:Season|節:せつ:Season,Joint,Node|期:き:Period,Time,Term|始:はじ:Begin,Start",
+    2: "天:てん:Heaven,Sky|気:き:Spirit,Mind,Atmosphere,Mood|空:そら:Sky,Empty|晴:はれ:Clear weather,Sunny|曇:くもり:Cloudy weather|雨:あめ:Rain|雪:ゆき:Snow|風:かぜ:Wind|雲:くも:Cloud|雷:かみなり:Thunder,Lightning|温:あたた:Warm (things/temp)|暖:あたた:Warm (weather/climate)|涼:すず:Cool,Refreshing|寒:さむ:Cold (weather)|暑:あつ:Hot (weather)|熱:あつ:Heat,Hot (things),Fever|氷:こおり:Ice|炭:すみ:Charcoal,Coal|石:いし:Stone,Rock|光:ひかり:Light,Ray|星:ほし:Star|山:やま:Mountain|川:かわ:River|海:うみ:Sea,Ocean|島:しま:Island|湖:みずうみ:Lake|岸:きし:Shore,Bank,Coast|岩:いわ:Rock,Boulder,Crag|砂:すな:Sand|泉:いずみ:Spring,Fountain|滝:たき:Waterfall|谷:たに:Valley|原:はら:Field,Meadow,Original|鉱:こう:Mineral,Ore|鉄:てつ:Iron|油:あぶら:Oil|波:なみ:Wave|陸:りく:Land,Shore|上:うえ:Up,Above,Over|下:した:Down,Below,Under|左:ひだり:Left|右:みぎ:Right|中:なか:Middle,Inside,Center|外:そと:Outside,Outer|広:ひろ:Wide,Broad,Spacious|狭:せま:Narrow,Cramped|高:たか:High,Tall,Expensive|低:ひく:Low|深:ふか:Deep|浅:あさ:Shallow",
+    3: "男:おとこ:Man,Male|女:おんな:Woman,Female|子:こ:Child|父:ちち:Father|母:はは:Mother|兄:あに:Older brother|弟:おとうと:Younger brother|姉:あね:Older sister|妹:いもうと:Younger sister|親:おや:Parent,Intimacy,Relative|族:ぞく:Family,Tribe|夫:おっと:Husband|妻:つま:Wife|娘:むすめ:Daughter,Girl|祖:そ:Ancestor,Grandparent|友:とも:Friend|人:ひと:Person|私:わたし:I,Me,Private|者:もの:Person (formal)|員:いん:Member,Employee|徒:と:Follower,Pupil,Walking|客:きゃく:Guest,Customer|婦:ふ:Lady,Woman,Wife|供:とも:Companion,Offer|達:たち:Plural marker,Accomplish|君:きみ:You,Buddy,Suffix for males|力:ちから:Power,Strength,Force|名:な:Name,Reputation|目:め:Eye,Item|耳:みみ:Ear|口:くち:Mouth|手:て:Hand|足:あし:Foot,Leg,Sufficient|頭:あたま:Head|顔:かお:Face|首:くび:Neck|肩:かた:Shoulder|鼻:はな:Nose|歯:は:Tooth|指:ゆび:Finger,Point|髪:かみ:Hair|胸:むね:Chest,Breast|腹:はら:Abdomen,Belly|背:せ:Back,Stature|骨:ほね:Bone|血:ち:Blood|心:こころ:Heart,Mind,Spirit|命:いのち:Life,Fate,Destiny|身:み:Body,Oneself,Social position|体:からだ:Body,Form",
+    4: "鳥:とり:Bird|魚:さかな:Fish|犬:いぬ:Dog|猫:ねこ:Cat|牛:うし:Cow,Cattle|馬:うま:Horse|虫:むし:Insect,Bug|羊:ひつじ:Sheep|豚:ぶた:Pig,Pork|鶏:にわとり:Chicken|獣:けもの:Beast,Animal|毛:け:Hair,Fur,Wool|白:しろ:White|赤:あか:Red|青:あお:Blue,Green|黒:くろ:Black|黄:き:Yellow|色:いろ:Color|暗:くら:Dark|明:あか:Bright,Clear|新:あたら:New|古:ふる:Old (things)|多:おお:Many,Much|少:すく:Few,Little|安:やす:Cheap,Safe,Peaceful|重:おも:Heavy,Important|軽:かる:Light (weight)|痛:いた:Pain,Hurt|苦:くる:Bitter,Suffering,Hardship|悲:かな:Sad|喜:よろこ:Rejoice,Glad|怒:おこ:Angry|恥:はじ:Shame,Embarrassment|弱:よわ:Weak|強:つよ:Strong|忙:いそが:Busy|暇:ひま:Free time,Leisure|早:はや:Early,Fast|遅:おそ:Late,Slow|遠:とお:Far,Distant|近:ちか:Near,Close|良:よ:Good|悪:わる:Bad,Evil|若:わか:Young|老:お:Old (people),Age|美:うつく:Beautiful|偉:えら:Great,Admirable|派:は:Faction,Group,Sect|柔:やわ:Soft,Flexible|軟:やわ:Soft (touch)",
+    5: "行:い:Go,Act|帰:かえ:Return,Go home|歩:ある:Walk|走:はし:Run|止:と:Stop|飛:と:Fly|泳:およ:Swim|動:うご:Move|働:はたら:Work|休:やす:Rest,Take a break|起:お:Wake up,Rise|寝:ね:Sleep,Lie down|座:すわ:Sit|立:た:Stand|乗:の:Ride,Get on|降:お:Descend,Get off,Fall|転:ころ:Roll,Turn over|洗:あら:Wash|泣:な:Cry|笑:わら:Laugh,Smile|押:お:Push|引:ひ:Pull|拾:ひろ:Pick up|捨:す:Throw away,Discard|触:さわ:Touch,Feel|抜:ぬ:Pull out,Extract|抱:だ:Embrace,Hold|浮:う:Float|沈:しず:Sink|渡:わた:Cross,Hand over|逃:に:Escape,Run away|追:お:Chase,Follow|越:こ:Cross over,Exceed|落:お:Fall,Drop|登:のぼ:Climb|踏:ふ:Step on,Tread|散:ち:Scatter,Disperse|集:あつ:Gather,Collect|並:なら:Line up,Average|列:れつ:Row,Line,Queue|移:うつ:Move,Shift,Transfer|向:む:Face,Toward,Direction|折:お:Fold,Break,Bend|刻:きざ:Engrave,Carve,Time|切:き:Cut|貼:は:Paste,Stick,Apply|入:はい:Enter,Insert|出:で:Exit,Put out,Leave|打:う:Hit,Strike|撃:う:Attack,Defeat",
+    6: "見:み:See,Look|聞:き:Hear,Listen,Ask|読:よ:Read|書:か:Write|話:はな:Speak,Talk|語:かた:Language,Word,Narrate|言:い:Say,Word|思:おも:Think,Feel|考:かんが:Consider,Think|知:し:Know|覚:おぼ:Remember,Awake,Memorize|忘:わす:Forget|決:き:Decide|信:しん:Believe,Trust,Message|疑:うたが:Doubt,Suspect|願:ねが:Wish,Request|頼:たの:Request,Rely on|呼:よ:Call|答:こた:Answer|説:せつ:Explain,Theory|記:き:Record,Write down|訳:わけ:Translate,Reason|伝:つた:Transmit,Convey|認:みと:Recognize,Acknowledge|識:しき:Consciousness,Knowledge|買:か:Buy|売:う:Sell|飲:の:Drink|食:た:Eat,Food|払:はら:Pay,Sweep away|貸:か:Lend|借:か:Borrow|返:かえ:Return|使:つか:Use|持:も:Hold,Have|取:と:Take|受:う:Receive,Undergo|給:きゅう:Provide,Wage,Salary|届:とど:Deliver,Reach|贈:おく:Gift,Present|迎:むか:Welcome,Meet,Greet|探:さが:Search,Look for|索:さく:Search,Cord|換:か:Exchange|構:かま:Construct,Mind|申:もう:Say (humble)|習:なら:Learn|科:か:Course,Subject,Department|算:さん:Calculate,Compute|告:つ:Announce,Tell",
+    7: "国:くに:Country,Nation|都:と:Metropolis,Capital|道:みち:Road,Path,Street|府:ふ:Prefecture,Agency|県:けん:Prefecture|市:し:City,Market|区:く:Ward,District|町:まち:Town|村:むら:Village|街:まち:Street,City quarter|駅:えき:Station|港:みなと:Port,Harbor|寺:てら:Temple (Buddhist)|社:しゃ:Company,Shrine (Shinto)|院:いん:Institution,Temple|堂:どう:Hall,Public building|店:みせ:Shop,Store|屋:や:Roof,House,Shop|室:しつ:Room|窓:まど:Window|階:かい:Floor,Story,Stair|戸:と:Door|門:もん:Gate|壁:かべ:Wall|庭:にわ:Garden,Yard|柱:はしら:Pillar,Post|宿:やど:Inn,Lodge,Lodging|宅:たく:House,Home,Residence|園:その:Park,Garden|場:ば:Place,Location|所:ところ:Place|館:かん:Building,Hall|建:たて:Build,Construct|築:きず:Fabricate,Build,Construct|宮:みや:Palace,Shinto shrine|邸:てい:Mansion,Residence|城:しろ:Castle|塔:とう:Tower,Pagoda|段:だん:Step,Grade,Rank|隅:すみ:Corner,Nook|側:がわ:Side|端:はし:Edge,End,Tip|底:そこ:Bottom|頂:いただき:Top,Summit|境:さかい:Boundary,Border,Situation|囲:かこ:Surround,Enclose|横:よこ:Side,Horizontal|逆:ぎゃく:Reverse,Opposite|辺:へん:Area,Vicinity,Border|地:ち:Ground,Earth,Land",
+    8: "家:いえ:House,Home,Family|具:ぐ:Tool,Utensil,Ingredient|箱:はこ:Box|袋:ふくろ:Bag,Sack|皿:さら:Plate,Dish|飯:めし:Meal,Cooked rice|菜:な:Vegetable,Side dish|席:せき:Seat|靴:くつ:Shoes|荷:に:Luggage,Baggage,Load|札:ふだ:Tag,Bill,Paper money|券:けん:Ticket|機:き:Machine,Opportunity|械:かい:Machine,Apparatus|器:うつわ:Vessel,Instrument,Container|紙:かみ:Paper|線:せん:Line|糸:いと:Thread|服:ふく:Clothes|着:き:Wear,Arrive|布:ぬの:Cloth|鏡:かがみ:Mirror|傘:かさ:Umbrella|本:ほん:Book,Origin,Main|棚:たな:Shelf|机:つくえ:Desk|湯:ゆ:Hot water|濯:たく:Wash,Laundry|沸:わ:Boil,Seethe|乾:かわ:Dry|掃:は:Sweep|肉:にく:Meat|茶:ちゃ:Tea|薬:くすり:Medicine|医:い:Medicine,Doctor|煙:けむり:Smoke|根:ね:Root|種:たね:Seed,Kind,Species|枝:えだ:Branch|桜:さくら:Cherry blossom|梅:うめ:Plum|森:もり:Forest|林:はやし:Woods,Grove|木:き:Tree,Wood|花:はな:Flower|草:くさ:Grass,Weed|葉:は:Leaf|生:なま:Life,Raw,Birth|咲:さ:Bloom|枯:か:Wither,Dry up",
+    9: "学:まな:Study,Learning|校:こう:School|教:おし:Teach,Religion|研:けん:Polish,Study|究:きゅう:Research,Investigate|試:ため:Test,Try|験:けん:Test,Examine|業:ぎょう:Business,Vocation,Industry|職:しょく:Employment,Job|務:つと:Task,Duties|経:へ:Manage,Pass through,Sutra|済:す:Finish,Settle,Economy|政:まつりごと:Politics,Government|治:なお:Govern,Cure|法:ほう:Law,Method|律:りつ:Law,Rhythm|際:さい:Occasion,International|係:かかり:Connection,Person in charge|団:だん:Group,Association|課:か:Section,Chapter,Lesson|役:やく:Duty,Role,Service|官:かん:Official,Government|警:けい:Guard,Warn,Police|署:しょ:Government office,Station|議:ぎ:Debate,Parliament|民:たみ:People,Nation|犯:おか:Crime,Commit|罪:つみ:Guilt,Sin,Crime|留:とど:Detain,Fasten,Halt|訪:おとず:Visit,Call on|招:まね:Invite|練:れん:Practice,Knead|慣:な:Accustomed,Habit|式:しき:Style,Ceremony,Formula|祭:まつり:Festival|祝:いわ:Celebrate,Congratulate|企:くわだ:Plan,Scheme,Enterprise|労:ろう:Labor,Toil|雇:やと:Employ,Hire|商:あきな:Commerce,Trade|貿:ぼう:Trade,Exchange|営:いとな:Manage,Conduct business|史:し:History|績:せき:Exploits,Achievements|価:あたい:Value,Price|争:あらそ:Contend,Dispute,Argue|戦:たたか:War,Battle|平:たいら:Flat,Peace|和:わ:Harmony,Peace|部:ぶ:Part,Section,Club,Department",
+    10: "理:り:Reason,Logic|意:い:Idea,Mind,Meaning|題:だい:Topic,Problem,Subject|味:あじ:Flavor,Taste,Meaning|用:よう:Use,Business,Errand|事:こと:Matter,Thing,Fact|物:もの:Thing,Object|品:しな:Goods,Article,Dignity|質:しつ:Quality,Matter|性:せい:Nature,Gender|的:てき:Target,ic|形:かたち:Shape,Form|状:じょう:Condition,Form,Letter|態:たい:Condition,State,Appearance|度:ど:Degree,Time,Occurrence|量:りょう:Quantity,Amount|測:はか:Measure,Fathom|規:き:Standard,Measure|則:そく:Rule,Law|差:さ:Difference,Margin|残:のこ:Remain,Leftover|額:ひたい:Amount,Forehead,Frame|税:ぜい:Tax|費:ひ:Expense,Cost|割:わり:Proportion,Divide,Cut|益:えき:Benefit,Profit|財:ざい:Property,Wealth,Finance|貧:まず:Poor,Poverty|富:とみ:Rich,Wealth|技:わざ:Skill,Art,Craft|能:のう:Ability,Talent,Skill|術:じゅつ:Art,Technique,Method|造:つく:Create,Make,Structure|設:もう:Establish,Setup|備:そな:Equip,Provision,Preparation|容:よう:Contain,Form,Looks|難:むずか:Difficult,Trouble,Hardship|普:ふ:Universal,General,Normal|雑:ざつ:Miscellaneous,Mixed,Rough|単:たん:Simple,Single|複:ふく:Duplicate,Multiple,Compound|全:まった:Whole,Entire,All|満:み:Full,Satisfy|欠:か:Lack,Gap,Defect|突:つ:Stab,Protruding,Thrust|偶:ぐう:Accidental,Even number|既:すで:Already,Previously|未:み:Not yet,Un|完:かん:Perfect,Completion,End|類:るい:Sort,Kind,Class",
+    11: "察:さつ:Guess,Presume,Judge|念:ねん:Thought,Idea,Desire|存:そん:Exist,Suppose,Be aware of|希:き:Hope,Beg,Rare|愛:あい:Love,Affection|憎:にく:Hate,Detest|恨:うら:Grudge,Resentment|録:ろく:Record,Transcript|述:の:State,Mention,Express|論:ろん:Theory,Argument,Discuss|評:ひょう:Evaluate,Criticism|判:はん:Judge,Decide,Stamp|導:みちび:Guide,Lead|示:しめ:Show,Indicate|表:おもて:Surface,Table,Express|現:あらわ:Present,Existing,Appear|象:ぞう:Elephant,Phenomenon,Image|敬:うやま:Respect,Honor|尊:とうと:Revere,Valuable,Noble|礼:れい:Manners,Bow,Gratitude|拝:おが:Worship,Adore,Pray|儀:ぎ:Ceremony,Rule,Affair|産:う:Produce,Give birth,Native|注:そそ:Pour,Note,Focus|特:とく:Special|台:だい:Stand,Pedestal,Machine counter|康:こう:Ease,Peace,Health|介:かい:Mediate,Help,Care|去:さ:Leave,Past,Quit|映:うつ:Reflect,Project|声:こえ:Voice|弓:ゆみ:Bow (archery)|婚:こん:Marriage|姓:せい:Surname|齢:れい:Age|殿:との:Hall,Mansion,Lord|紹:しょう:Introduce|暮:く:Livelihood,Evening|努:つと:Toil,Diligent,Effort|豊:ゆた:Bountiful,Plentiful,Rich|陽:よう:Sunshine,Yang,Positive|球:たま:Sphere,Ball|燃:も:Burn,Blaze|農:のう:Farming,Agriculture|震:ふる:Quake,Shake|災:わざわ:Disaster,Calamity|害:がい:Harm,Injury|燥:そう:Parched,Dry|吹:ふ:Blow,Breathe|液:えき:Fluid,Liquid",
+    12: "交:まじ:Mix,Intersect,Exchange|資:し:Assets,Resources,Capital|運:はこ:Carry,Transport,Luck|楽:たの:Music,Comfort,Fun|組:くみ:Assemble,Put together,Group|車:くるま:Car,Vehicle,Wheel|字:じ:Character,Letter,Word|病:やまい:Illness,Sickness|歌:うた:Song,Sing|局:きょく:Bureau,Office,Board|健:すこ:Healthy,Health|音:おと:Sound,Noise|旅:たび:Travel,Trip|勉:べん:Endeavor,Effort|善:よ:Good,Virtuous|療:りょう:Heal,Cure,Medical treatment|防:ふせ:Defend,Protect,Prevent|救:すく:Save,Rescue|護:ご:Safeguard,Protect|衛:えい:Defense,Protection|視:し:See,Look at,Vision|査:さ:Investigate,Inspect|検:けん:Examine,Inspect|証:しょう:Evidence,Proof,Certificate|可:か:Possible,Acceptable,Can|否:いな:No,Negate,Decline|定:さだ:Determine,Fix,Decide|断:ことわ:Cut off,Decide,Refuse|案:あん:Plan,Idea,Draft|件:けん:Matter,Case,Affair|条:じょう:Clause,Article|許:ゆる:Permit,Allow|置:お:Put,Place|標:ひょう:Mark,Sign,Target|志:こころざし:Intention,Will,Motive|参:まい:Participate,Visit|共:とも:Together,Both|協:きょう:Cooperation,Co|効:き:Effect,Efficacy,Merit|結:むす:Tie,Bind,Conclude|因:よ:Cause,Factor|由:よし:Reason,Origin|河:かわ:River|流:なが:Flow,Current|浴:あ:Bathe,Bask in|正:ただ:Correct,Right,Just|角:かど:Corner,Angle,Horn|丸:まる:Round,Circle,Whole|絵:え:Picture,Painting,Drawing|図:ず:Map,Diagram,Plan",
+    13: "各:おのおの:Each,Every|互:たが:Mutual,Reciprocal|絡:から:Entwine,Contact|似:に:Resemble,Similar|鳴:な:Chirp,Ring,Sound|飾:かざ:Decorate,Ornament|帯:おび:Belt,Sash,Zone|輪:わ:Ring,Wheel,Circle|湾:わん:Bay,Gulf|丘:おか:Hill|坂:さか:Slope,Hill|沼:ぬま:Swamp,Bog|池:いけ:Pond|田:た:Rice field|芝:しば:Lawn,Grass|句:く:Phrase,Haiku|詞:し:Word,Poetry|詩:し:Poem,Poetry|誌:し:Magazine,Document|筆:ふで:Brush,Writing|筒:つつ:Cylinder,Tube,Pipe|封:ふう:Seal,Enclose|籍:せき:Register,Enrollment|辞:や:Resign,Word,Dictionary|典:てん:Code,Ceremony,Reference|型:かた:Model,Type,Mold|版:はん:Edition,Printing block|刷:す:Print|刊:かん:Publish,Edition|創:つく:Create,Originate|製:せい:Manufacture,Make|写:うつ:Copy,Photograph|真:ま:True,Real|像:ぞう:Image,Statue,Figure|展:てん:Unfold,Exhibit,Expand|影:かげ:Shadow,Silhouette|響:ひび:Echo,Resound,Influence|劇:げき:Drama,Play|舞:まい:Dance|姿:すがた:Figure,Form,Appearance|勢:いきお:Force,Vigor,Energy|担:にな:Shoulder,Bear|任:まか:Responsibility,Entrust|退:しりぞ:Retire,Retreat,Withdraw|昇:のぼ:Rise,Ascend|就:つ:Settle in,Take position|販:はん:Sell,Marketing|購:こう:Purchase,Buy|値:ね:Price,Value|文:ぶん:Sentence,Text,Literature"
 };
 
-let kanjiDB = [];
-let dbMap = {};
+let kanjiDB = {};
+let allKanjiFlat = [];
+let currentCategory = 1;
+let currentList = [];
+let currentIndex = 0;
+let currentCorrectIndex = -1;
+let answered = false;
+
+// Test Mode State
+let testQuestions = [];
+let testScore = 0;
+let isTestMode = false;
+
+function shuffleArray(array) {
+    let currentIndex = array.length, randomIndex;
+    while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
+}
 
 function initDB() {
-    let items = rawDataString.split("|");
-    items.forEach(item => {
-        let parts = item.split(":");
-        if(parts.length < 3) return;
-        
-        let char = parts[0];
-        let baseObj = {
-            id: char,
-            char: char,
-            furigana: parts[1],
-            meanings: parts[2].split(",").join(", "),
-            radicals: char + " (Base)",
-            mnemonic: `To remember ${char}, associate it with its core meaning: ${parts[2].split(",")[0]}.`,
-            vocab: [
-                { word: char + "字", reading: parts[1] + "じ", meaning: parts[2].split(",")[0] + " character" }
-            ]
-        };
+    for (let cat = 1; cat <= 13; cat++) {
+        kanjiDB[cat] = [];
+        let pairs = rawData[cat].split("|");
+        pairs.forEach(p => {
+            if (!p) return; // Fail-safe
+            let parts = p.split(":");
+            let char = parts[0];
+            let furigana = parts[1];
+            let meanings = parts[2];
+            let obj = { char, furigana, meanings, cat };
+            kanjiDB[cat].push(obj);
+            allKanjiFlat.push(obj);
+        });
+    }
+}
 
-        if(richDictionary[char]) {
-            baseObj.radicals = richDictionary[char].radicals;
-            baseObj.mnemonic = richDictionary[char].mnemonic;
-            baseObj.vocab = richDictionary[char].vocab;
+function switchModeVisuals(mode) {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('studyMode').classList.remove('active');
+    document.getElementById('testMode').classList.remove('active');
+    
+    isTestMode = (mode === 'test');
+
+    if(mode === 'study') {
+        document.getElementById('btnStudy').classList.add('active');
+        document.getElementById('studyMode').classList.add('active');
+    } else if (mode === 'test') {
+        document.getElementById('btnTest').classList.add('active');
+        document.getElementById('testMode').classList.add('active');
+    }
+}
+
+function loadCategory(catId) {
+    currentCategory = parseInt(catId);
+    currentList = kanjiDB[currentCategory];
+    currentIndex = 0;
+    switchModeVisuals('study');
+    renderStudy();
+}
+
+function generateOptions(correctItem) {
+    let options = [correctItem];
+    
+    while(options.length < 4) {
+        let randItem = allKanjiFlat[Math.floor(Math.random() * allKanjiFlat.length)];
+        if(randItem && !options.some(opt => opt.char === randItem.char)) {
+            options.push(randItem);
         }
+    }
+    return shuffleArray(options);
+}
 
-        kanjiDB.push(baseObj);
-        dbMap[char] = baseObj;
+function createOptionHTML(options, prefix) {
+    let html = "";
+    options.forEach((opt, idx) => {
+        html += `
+        <div class="mcq-option" id="${prefix}Opt${idx}" onclick="handleSelection(${idx}, '${prefix}')">
+            <span class="option-number">${idx + 1}.</span>
+            <span class="furigana-text">${opt.furigana}</span>
+            <span class="meaning-text">${opt.meanings}</span>
+        </div>`;
     });
+    return html;
 }
 
-// SM-2 Based SRS Algorithm
-let srsState = JSON.parse(localStorage.getItem('kanji_srs_data')) || {};
-
-function getNewKanji() { return kanjiDB.filter(k => !srsState[k.id]); }
-function getDueKanji() { const now = Date.now(); return kanjiDB.filter(k => srsState[k.id] && srsState[k.id].nextReview <= now); }
-
-function updateDashboard() {
-    document.getElementById('due-count').innerText = getDueKanji().length;
-    document.getElementById('new-count').innerText = getNewKanji().length;
+function renderStudy() {
+    if(currentIndex >= currentList.length) currentIndex = 0;
+    answered = false;
     
-    document.getElementById('btn-review').disabled = getDueKanji().length === 0;
-    document.getElementById('btn-learn').disabled = getNewKanji().length === 0;
+    let item = currentList[currentIndex];
+    
+    // Fail-safe
+    if (!item) return;
+
+    document.getElementById("studyKanji").innerText = item.char;
+    document.getElementById("studyProgress").innerText = `Kanji ${currentIndex + 1} / ${currentList.length}`;
+    
+    let options = generateOptions(item);
+    currentCorrectIndex = options.findIndex(o => o.char === item.char);
+    
+    document.getElementById("studyOptions").innerHTML = createOptionHTML(options, 'study');
+    document.getElementById("studyFeedback").innerText = "";
+    document.getElementById("studyFeedback").style.color = "";
+    document.getElementById("studyNextBtn").style.display = "none";
 }
 
-function calculateNextReview(grade, currentItemState) {
-    let state = currentItemState || { interval: 0, repetition: 0, efactor: 2.5 };
+function nextStudyQuestion() {
+    currentIndex++;
+    renderStudy();
+}
+
+function startTestMode() {
+    // Generate questions FIRST before rendering the UI
+    let shuffled = shuffleArray([...allKanjiFlat]);
+    testQuestions = shuffled.slice(0, 20);
+    currentIndex = 0;
+    testScore = 0;
     
-    if (grade >= 3) {
-        if (state.repetition === 0) state.interval = 1;
-        else if (state.repetition === 1) state.interval = 6;
-        else state.interval = Math.round(state.interval * state.efactor);
-        state.repetition += 1;
+    switchModeVisuals('test');
+    renderTest();
+}
+
+function renderTest() {
+    if(currentIndex >= 20) {
+        finishTest();
+        return;
+    }
+    
+    answered = false;
+    let item = testQuestions[currentIndex];
+    
+    // Fail-safe
+    if (!item) return;
+    
+    document.getElementById("testKanji").innerText = item.char;
+    document.getElementById("testProgress").innerText = `Question ${currentIndex + 1} / 20`;
+    
+    let options = generateOptions(item);
+    currentCorrectIndex = options.findIndex(o => o.char === item.char);
+    
+    document.getElementById("testOptions").innerHTML = createOptionHTML(options, 'test');
+    document.getElementById("testFeedback").innerText = "";
+    document.getElementById("testFeedback").style.color = "";
+    document.getElementById("testNextBtn").style.display = "none";
+}
+
+function nextTestQuestion() {
+    currentIndex++;
+    renderTest();
+}
+
+function finishTest() {
+    document.getElementById("testKanji").innerText = "完了"; 
+    
+    let percentage = (testScore / 20) * 100;
+    document.getElementById("testProgress").innerText = `Final Score: ${testScore} / 20 (${percentage}%)`;
+    
+    let evaluation = percentage >= 90 ? "Excellent work! Ready for the real exam." 
+                   : percentage >= 70 ? "Good job! Keep reviewing." 
+                   : "Needs more practice.";
+                   
+    document.getElementById("testOptions").innerHTML = `<h3 style="text-align:center; color:var(--text-main); margin-top:20px;">${evaluation}</h3>`;
+    document.getElementById("testFeedback").innerText = "";
+    document.getElementById("testNextBtn").innerText = "Restart Test";
+    document.getElementById("testNextBtn").style.display = "block";
+    document.getElementById("testNextBtn").onclick = startTestMode;
+}
+
+function handleSelection(selectedIndex, prefix) {
+    if (answered) return; 
+    answered = true;
+    
+    let isCorrect = (selectedIndex === currentCorrectIndex);
+    let optionsDivs = document.getElementById(`${prefix}Options`).children;
+    let feedbackDiv = document.getElementById(`${prefix}Feedback`);
+    let nextBtn = document.getElementById(`${prefix}NextBtn`);
+    
+    for (let i = 0; i < optionsDivs.length; i++) {
+        optionsDivs[i].classList.add("disabled");
+        if (i === currentCorrectIndex) {
+            optionsDivs[i].classList.add("correct");
+        } else if (i === selectedIndex && !isCorrect) {
+            optionsDivs[i].classList.add("incorrect");
+        }
+    }
+    
+    if (isCorrect) {
+        feedbackDiv.innerText = "Correct! (正解)";
+        feedbackDiv.style.color = "var(--correct-color)";
+        if(isTestMode) testScore++;
     } else {
-        state.repetition = 0;
-        state.interval = 1; 
+        feedbackDiv.innerText = "Incorrect. (不正解)";
+        feedbackDiv.style.color = "var(--red-accent)";
     }
-
-    let sm2Grade = grade === 1 ? 0 : grade === 2 ? 3 : grade === 3 ? 4 : 5;
-    state.efactor = state.efactor + (0.1 - (5 - sm2Grade) * (0.08 + (5 - sm2Grade) * 0.02));
-    if (state.efactor < 1.3) state.efactor = 1.3;
-
-    const msPerDay = 24 * 60 * 60 * 1000;
-    state.nextReview = Date.now() + (state.interval * msPerDay);
     
-    return state;
+    nextBtn.style.display = "block";
 }
 
-function formatInterval(days) {
-    if(days === 0) return "< 1m";
-    if(days === 1) return "1d";
-    if(days < 30) return days + "d";
-    return Math.round(days/30) + "m";
-}
-
-let currentQueue = [];
-let currentItem = null;
-
-function showView(viewId) {
-    document.querySelectorAll('.container').forEach(el => el.classList.remove('active'));
-    document.getElementById(viewId).classList.add('active');
-}
-
-function startLearn() {
-    currentQueue = getNewKanji().slice(0, 5); 
-    if(currentQueue.length === 0) return;
-    renderLearnItem();
-    showView('learn-view');
-}
-
-function renderLearnItem() {
-    currentItem = currentQueue[0];
-    document.getElementById('learn-kanji').innerText = currentItem.char;
-    document.getElementById('learn-furigana').innerText = currentItem.furigana;
-    document.getElementById('learn-meanings').innerText = currentItem.meanings;
-    document.getElementById('learn-radicals').innerText = currentItem.radicals;
-    document.getElementById('learn-mnemonic').innerText = currentItem.mnemonic;
-    
-    let vocabHtml = "";
-    currentItem.vocab.forEach(v => {
-        vocabHtml += `<li><strong>${v.word}</strong> <span class="vocab-reading">(${v.reading})</span> - ${v.meaning}</li>`;
-    });
-    document.getElementById('learn-vocab').innerHTML = vocabHtml;
-}
-
-function finishLearnItem() {
-    srsState[currentItem.id] = { interval: 0, repetition: 0, efactor: 2.5, nextReview: Date.now() };
-    saveData();
-    currentQueue.shift();
-    if(currentQueue.length > 0) renderLearnItem();
-    else { updateDashboard(); showView('dashboard'); }
-}
-
-function startReview() {
-    currentQueue = getDueKanji();
-    if(currentQueue.length === 0) return;
-    currentQueue.sort(() => Math.random() - 0.5);
-    renderReviewItem();
-    showView('review-view');
-}
-
-function renderReviewItem() {
-    currentItem = currentQueue[0];
-    document.getElementById('review-progress').innerText = `Due: ${currentQueue.length}`;
-    document.getElementById('review-kanji').innerText = currentItem.char;
-    document.getElementById('btn-reveal').style.display = 'block';
-    document.getElementById('review-details').style.display = 'none';
-}
-
-function revealAnswer() {
-    document.getElementById('btn-reveal').style.display = 'none';
-    document.getElementById('review-details').style.display = 'block';
-    
-    document.getElementById('review-meanings').innerText = currentItem.meanings;
-    document.getElementById('review-furigana').innerText = currentItem.furigana;
-    
-    let vocabHtml = "";
-    currentItem.vocab.forEach(v => {
-        vocabHtml += `<li><strong>${v.word}</strong> <span class="vocab-reading">(${v.reading})</span> - ${v.meaning}</li>`;
-    });
-    document.getElementById('review-vocab').innerHTML = vocabHtml;
-
-    let currentState = srsState[currentItem.id];
-    document.getElementById('int-hard').innerText = formatInterval(calculateNextReview(2, {...currentState}).interval);
-    document.getElementById('int-good').innerText = formatInterval(calculateNextReview(3, {...currentState}).interval);
-    document.getElementById('int-easy').innerText = formatInterval(calculateNextReview(4, {...currentState}).interval);
-}
-
-function processGrade(grade) {
-    let state = srsState[currentItem.id];
-    srsState[currentItem.id] = calculateNextReview(grade, state);
-    saveData();
-    
-    currentQueue.shift();
-    if(currentQueue.length > 0) renderReviewItem();
-    else { updateDashboard(); showView('dashboard'); }
-}
-
-function saveData() { localStorage.setItem('kanji_srs_data', JSON.stringify(srsState)); }
-
-function resetData() {
-    if(confirm("Delete all SRS progress? This cannot be undone.")) {
-        localStorage.removeItem('kanji_srs_data');
-        srsState = {};
-        updateDashboard();
-    }
-}
-
-window.onload = () => {
-    initDB();
-    updateDashboard();
-};
+// Initialize application immediately
+initDB();
+loadCategory("1");
 </script>
 </body>
 </html>
