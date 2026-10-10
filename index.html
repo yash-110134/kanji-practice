@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kanji Mastery: JLPT Style</title>
+<title>Kanji Mastery: Typed Input Mode</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;300;400&family=Shippori+Mincho:wght@400;500&display=swap" rel="stylesheet">
 <style>
     :root {
@@ -108,67 +108,61 @@
         margin-bottom: 20px;
     }
 
-    /* JLPT Style MCQ Options */
-    .mcq-options {
+    /* Typed Input Styles */
+    .input-group {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 15px;
         width: 100%;
         margin-bottom: 25px;
     }
 
-    .mcq-option {
+    .input-field {
         background: #1a1a20;
-        padding: 18px 20px;
-        border-radius: 8px;
-        cursor: pointer;
         border: 1px solid #2a2a30;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        font-size: 18px;
+        width: 100%;
+        box-sizing: border-box;
         transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        font-size: 17px;
     }
 
-    .mcq-option:hover:not(.disabled) { background: #22222a; border-color: var(--red-accent); }
-    
-    .mcq-option.disabled { cursor: default; }
-    
-    .mcq-option.correct { 
-        background: rgba(76, 175, 80, 0.1); 
-        border-color: var(--correct-color);
-        color: var(--correct-color);
-    }
-    
-    .mcq-option.incorrect { 
-        background: rgba(229, 57, 53, 0.1); 
+    .input-field:focus {
         border-color: var(--red-accent);
-        color: var(--red-accent);
+        outline: none;
     }
 
-    .option-number {
-        font-weight: bold;
-        margin-right: 15px;
-        color: #666;
+    .input-field:disabled {
+        background: #111;
+        color: #777;
     }
 
-    .furigana-text {
-        color: #aaa;
-        font-family: 'Meiryo', sans-serif;
-        margin-right: 15px;
-        min-width: 80px;
+    .input-field.correct {
+        border-color: var(--correct-color);
+        background: rgba(76, 175, 80, 0.1);
     }
 
-    .meaning-text { font-weight: 600; }
-    
-    .mcq-option.correct .option-number, .mcq-option.correct .furigana-text { color: var(--correct-color); }
-    .mcq-option.incorrect .option-number, .mcq-option.incorrect .furigana-text { color: var(--red-accent); }
+    .input-field.incorrect {
+        border-color: var(--red-accent);
+        background: rgba(229, 57, 53, 0.1);
+    }
+
+    .action-btn {
+        width: 100%;
+        padding: 16px;
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
 
     .feedback-area {
-        min-height: 30px;
-        font-size: 18px;
-        font-weight: bold;
+        min-height: 60px;
+        font-size: 16px;
         margin-bottom: 20px;
         text-align: center;
+        line-height: 1.5;
+        width: 100%;
     }
     
     .next-btn {
@@ -176,7 +170,17 @@
         padding: 16px;
         font-size: 18px;
         display: none;
+        background-color: #2a2a30;
+        border: 1px solid #3a3a40;
     }
+
+    .next-btn:hover {
+        background-color: #3a3a40;
+    }
+    
+    .correct-text { color: var(--correct-color); font-weight: bold; }
+    .incorrect-text { color: var(--red-accent); font-weight: bold; }
+    .correction-text { color: #aaa; font-size: 14px; display: block; margin-top: 5px; }
 </style>
 </head>
 <body>
@@ -202,7 +206,7 @@
         <button onclick="startTestMode()">Start 20-Kanji Random Test</button>
     </div>
     <div class="mode-switch">
-        <button id="btnStudy" class="mode-btn active" onclick="loadCategory(document.getElementById('categorySelect').value)">Category Quiz</button>
+        <button id="btnStudy" class="mode-btn active" onclick="loadCategory(document.getElementById('categorySelect').value)">Category Practice</button>
         <button id="btnTest" class="mode-btn" onclick="startTestMode()">Random Test</button>
     </div>
 </header>
@@ -210,9 +214,14 @@
 <div id="studyMode" class="container active">
     <div id="studyProgress" class="progress">Kanji 1 / 50</div>
     <div class="kanji-display" id="studyKanji">一</div>
-    <p class="instruction-text">Select the correct reading and meaning:</p>
+    <p class="instruction-text">Type the Hiragana reading and English meaning:</p>
     
-    <div id="studyOptions" class="mcq-options"></div>
+    <div class="input-group">
+        <input type="text" id="studyFuriInput" class="input-field" placeholder="Reading" autocomplete="off">
+        <input type="text" id="studyMeanInput" class="input-field" placeholder="Meaning" autocomplete="off">
+    </div>
+    
+    <button id="studyCheckBtn" class="action-btn" onclick="checkAnswer('study')">Check Answer</button>
     <div id="studyFeedback" class="feedback-area"></div>
     <button id="studyNextBtn" class="next-btn" onclick="nextStudyQuestion()">Next Question ➔</button>
 </div>
@@ -221,15 +230,19 @@
     <h2 style="color:var(--red-accent); margin-bottom: 10px; font-weight: 600;">20-Question JLPT Exam</h2>
     <div id="testProgress" class="progress">Question 1 / 20</div>
     <div class="kanji-display" id="testKanji">一</div>
-    <p class="instruction-text">Select the correct reading and meaning:</p>
+    <p class="instruction-text">Type the Hiragana reading and English meaning:</p>
     
-    <div id="testOptions" class="mcq-options"></div>
+    <div class="input-group">
+        <input type="text" id="testFuriInput" class="input-field" placeholder="Reading" autocomplete="off">
+        <input type="text" id="testMeanInput" class="input-field" placeholder="Meaning" autocomplete="off">
+    </div>
+    
+    <button id="testCheckBtn" class="action-btn" onclick="checkAnswer('test')">Check Answer</button>
     <div id="testFeedback" class="feedback-area"></div>
     <button id="testNextBtn" class="next-btn" onclick="nextTestQuestion()">Next Question ➔</button>
 </div>
 
 <script>
-// Verified 650 Kanji Database with Furigana & Meanings
 const rawData = {
     1: "一:いち:One|二:に:Two|三:さん:Three|四:よん:Four|五:ご:Five|六:ろく:Six|七:なな:Seven|八:はち:Eight|九:きゅう:Nine|十:じゅう:Ten|百:ひゃく:Hundred|千:せん:Thousand|万:まん:Ten thousand|間:あいだ:Interval,Space,Between|円:えん:Yen,Circle|倍:ばい:Double,Times,Fold|半:はん:Half|毎:まい:Every|今:いま:Now|先:さき:Before,Ahead,Future|来:らい:Come,Next|昔:むかし:Long ago,Past|次:つぎ:Next|何:なに:What|日:にち:Day,Sun|月:つき:Month,Moon|火:ひ:Fire|水:みず:Water|点:てん:Point,Dot,Score|金:きん:Gold,Money,Friday|土:つち:Earth,Soil,Saturday|年:とし:Year|週:しゅう:Week|時:じ:Time,Hour|分:ふん:Minute,Part,Understand|秒:びょう:Second (time)|曜:よう:Day of the week|朝:あさ:Morning|昼:ひる:Noon,Daytime|夜:よる:Night|晩:ばん:Evening,Night|夕:ゆう:Evening|春:はる:Spring|夏:なつ:Summer|秋:あき:Autumn,Fall|冬:ふゆ:Winter|季:き:Season|節:せつ:Season,Joint,Node|期:き:Period,Time,Term|始:はじ:Begin,Start",
     2: "天:てん:Heaven,Sky|気:き:Spirit,Mind,Atmosphere,Mood|空:そら:Sky,Empty|晴:はれ:Clear weather,Sunny|曇:くもり:Cloudy weather|雨:あめ:Rain|雪:ゆき:Snow|風:かぜ:Wind|雲:くも:Cloud|雷:かみなり:Thunder,Lightning|温:あたた:Warm (things/temp)|暖:あたた:Warm (weather/climate)|涼:すず:Cool,Refreshing|寒:さむ:Cold (weather)|暑:あつ:Hot (weather)|熱:あつ:Heat,Hot (things),Fever|氷:こおり:Ice|炭:すみ:Charcoal,Coal|石:いし:Stone,Rock|光:ひかり:Light,Ray|星:ほし:Star|山:やま:Mountain|川:かわ:River|海:うみ:Sea,Ocean|島:しま:Island|湖:みずうみ:Lake|岸:きし:Shore,Bank,Coast|岩:いわ:Rock,Boulder,Crag|砂:すな:Sand|泉:いずみ:Spring,Fountain|滝:たき:Waterfall|谷:たに:Valley|原:はら:Field,Meadow,Original|鉱:こう:Mineral,Ore|鉄:てつ:Iron|油:あぶら:Oil|波:なみ:Wave|陸:りく:Land,Shore|上:うえ:Up,Above,Over|下:した:Down,Below,Under|左:ひだり:Left|右:みぎ:Right|中:なか:Middle,Inside,Center|外:そと:Outside,Outer|広:ひろ:Wide,Broad,Spacious|狭:せま:Narrow,Cramped|高:たか:High,Tall,Expensive|低:ひく:Low|深:ふか:Deep|浅:あさ:Shallow",
@@ -251,7 +264,6 @@ let allKanjiFlat = [];
 let currentCategory = 1;
 let currentList = [];
 let currentIndex = 0;
-let currentCorrectIndex = -1;
 let answered = false;
 
 // Test Mode State
@@ -274,7 +286,7 @@ function initDB() {
         kanjiDB[cat] = [];
         let pairs = rawData[cat].split("|");
         pairs.forEach(p => {
-            if (!p) return; // Fail-safe
+            if (!p) return; 
             let parts = p.split(":");
             let char = parts[0];
             let furigana = parts[1];
@@ -310,50 +322,16 @@ function loadCategory(catId) {
     renderStudy();
 }
 
-function generateOptions(correctItem) {
-    let options = [correctItem];
-    
-    while(options.length < 4) {
-        let randItem = allKanjiFlat[Math.floor(Math.random() * allKanjiFlat.length)];
-        if(randItem && !options.some(opt => opt.char === randItem.char)) {
-            options.push(randItem);
-        }
-    }
-    return shuffleArray(options);
-}
-
-function createOptionHTML(options, prefix) {
-    let html = "";
-    options.forEach((opt, idx) => {
-        html += `
-        <div class="mcq-option" id="${prefix}Opt${idx}" onclick="handleSelection(${idx}, '${prefix}')">
-            <span class="option-number">${idx + 1}.</span>
-            <span class="furigana-text">${opt.furigana}</span>
-            <span class="meaning-text">${opt.meanings}</span>
-        </div>`;
-    });
-    return html;
-}
-
 function renderStudy() {
     if(currentIndex >= currentList.length) currentIndex = 0;
     answered = false;
-    
     let item = currentList[currentIndex];
-    
-    // Fail-safe
     if (!item) return;
 
     document.getElementById("studyKanji").innerText = item.char;
     document.getElementById("studyProgress").innerText = `Kanji ${currentIndex + 1} / ${currentList.length}`;
     
-    let options = generateOptions(item);
-    currentCorrectIndex = options.findIndex(o => o.char === item.char);
-    
-    document.getElementById("studyOptions").innerHTML = createOptionHTML(options, 'study');
-    document.getElementById("studyFeedback").innerText = "";
-    document.getElementById("studyFeedback").style.color = "";
-    document.getElementById("studyNextBtn").style.display = "none";
+    resetInputs('study');
 }
 
 function nextStudyQuestion() {
@@ -362,7 +340,6 @@ function nextStudyQuestion() {
 }
 
 function startTestMode() {
-    // Generate questions FIRST before rendering the UI
     let shuffled = shuffleArray([...allKanjiFlat]);
     testQuestions = shuffled.slice(0, 20);
     currentIndex = 0;
@@ -380,20 +357,12 @@ function renderTest() {
     
     answered = false;
     let item = testQuestions[currentIndex];
-    
-    // Fail-safe
     if (!item) return;
     
     document.getElementById("testKanji").innerText = item.char;
     document.getElementById("testProgress").innerText = `Question ${currentIndex + 1} / 20`;
     
-    let options = generateOptions(item);
-    currentCorrectIndex = options.findIndex(o => o.char === item.char);
-    
-    document.getElementById("testOptions").innerHTML = createOptionHTML(options, 'test');
-    document.getElementById("testFeedback").innerText = "";
-    document.getElementById("testFeedback").style.color = "";
-    document.getElementById("testNextBtn").style.display = "none";
+    resetInputs('test');
 }
 
 function nextTestQuestion() {
@@ -411,45 +380,110 @@ function finishTest() {
                    : percentage >= 70 ? "Good job! Keep reviewing." 
                    : "Needs more practice.";
                    
-    document.getElementById("testOptions").innerHTML = `<h3 style="text-align:center; color:var(--text-main); margin-top:20px;">${evaluation}</h3>`;
-    document.getElementById("testFeedback").innerText = "";
-    document.getElementById("testNextBtn").innerText = "Restart Test";
-    document.getElementById("testNextBtn").style.display = "block";
-    document.getElementById("testNextBtn").onclick = startTestMode;
+    document.getElementById("testFeedback").innerHTML = `<h3 style="color:var(--text-main);">${evaluation}</h3>`;
+    
+    document.getElementById("testFuriInput").style.display = "none";
+    document.getElementById("testMeanInput").style.display = "none";
+    document.getElementById("testCheckBtn").style.display = "none";
+    
+    let nextBtn = document.getElementById("testNextBtn");
+    nextBtn.innerText = "Restart Test";
+    nextBtn.style.display = "block";
+    nextBtn.onclick = () => {
+        document.getElementById("testFuriInput").style.display = "block";
+        document.getElementById("testMeanInput").style.display = "block";
+        document.getElementById("testCheckBtn").style.display = "block";
+        startTestMode();
+    };
 }
 
-function handleSelection(selectedIndex, prefix) {
+function resetInputs(prefix) {
+    let furiInput = document.getElementById(`${prefix}FuriInput`);
+    let meanInput = document.getElementById(`${prefix}MeanInput`);
+    let checkBtn = document.getElementById(`${prefix}CheckBtn`);
+    let nextBtn = document.getElementById(`${prefix}NextBtn`);
+    let feedback = document.getElementById(`${prefix}Feedback`);
+
+    furiInput.value = "";
+    meanInput.value = "";
+    furiInput.disabled = false;
+    meanInput.disabled = false;
+    furiInput.className = "input-field";
+    meanInput.className = "input-field";
+    
+    feedback.innerHTML = "";
+    checkBtn.style.display = "block";
+    nextBtn.style.display = "none";
+    
+    furiInput.focus();
+}
+
+function checkAnswer(prefix) {
     if (answered) return; 
     answered = true;
     
-    let isCorrect = (selectedIndex === currentCorrectIndex);
-    let optionsDivs = document.getElementById(`${prefix}Options`).children;
-    let feedbackDiv = document.getElementById(`${prefix}Feedback`);
-    let nextBtn = document.getElementById(`${prefix}NextBtn`);
+    let currentItem = isTestMode ? testQuestions[currentIndex] : currentList[currentIndex];
     
-    for (let i = 0; i < optionsDivs.length; i++) {
-        optionsDivs[i].classList.add("disabled");
-        if (i === currentCorrectIndex) {
-            optionsDivs[i].classList.add("correct");
-        } else if (i === selectedIndex && !isCorrect) {
-            optionsDivs[i].classList.add("incorrect");
+    let furiInput = document.getElementById(`${prefix}FuriInput`);
+    let meanInput = document.getElementById(`${prefix}MeanInput`);
+    
+    let userFuri = furiInput.value.trim();
+    let userMean = meanInput.value.trim().toLowerCase();
+    
+    // Parse accepted meanings (split by comma, clean whitespace, convert to lowercase)
+    let acceptedMeanings = currentItem.meanings.split(',').map(m => m.trim().toLowerCase());
+    
+    let isFuriCorrect = (userFuri === currentItem.furigana);
+    let isMeanCorrect = acceptedMeanings.includes(userMean);
+    
+    // UI Updates
+    furiInput.disabled = true;
+    meanInput.disabled = true;
+    
+    if (isFuriCorrect) furiInput.classList.add("correct");
+    else furiInput.classList.add("incorrect");
+    
+    if (isMeanCorrect) meanInput.classList.add("correct");
+    else meanInput.classList.add("incorrect");
+    
+    // Feedback Generation
+    let feedbackHTML = "";
+    if (isFuriCorrect && isMeanCorrect) {
+        feedbackHTML = `<span class="correct-text">Perfect! (正解)</span>`;
+        if (isTestMode) testScore++;
+    } else {
+        feedbackHTML = `<span class="incorrect-text">Incorrect. (不正解)</span>`;
+        if (!isFuriCorrect) {
+            feedbackHTML += `<span class="correction-text">Reading: ${currentItem.furigana}</span>`;
+        }
+        if (!isMeanCorrect) {
+            feedbackHTML += `<span class="correction-text">Meaning: ${currentItem.meanings}</span>`;
         }
     }
     
-    if (isCorrect) {
-        feedbackDiv.innerText = "Correct! (正解)";
-        feedbackDiv.style.color = "var(--correct-color)";
-        if(isTestMode) testScore++;
-    } else {
-        feedbackDiv.innerText = "Incorrect. (不正解)";
-        feedbackDiv.style.color = "var(--red-accent)";
-    }
+    document.getElementById(`${prefix}Feedback`).innerHTML = feedbackHTML;
+    document.getElementById(`${prefix}CheckBtn`).style.display = "none";
     
+    let nextBtn = document.getElementById(`${prefix}NextBtn`);
+    nextBtn.innerText = "Next Question ➔";
+    nextBtn.onclick = isTestMode ? nextTestQuestion : nextStudyQuestion;
     nextBtn.style.display = "block";
 }
 
-// Initialize application immediately
+// Add enter key event listeners
+function attachEnterKey(prefix) {
+    document.getElementById(`${prefix}FuriInput`).addEventListener("keypress", function(e) {
+        if (e.key === "Enter") document.getElementById(`${prefix}MeanInput`).focus();
+    });
+    document.getElementById(`${prefix}MeanInput`).addEventListener("keypress", function(e) {
+        if (e.key === "Enter") checkAnswer(prefix);
+    });
+}
+
+// Initialize application
 initDB();
+attachEnterKey('study');
+attachEnterKey('test');
 loadCategory("1");
 </script>
 </body>
